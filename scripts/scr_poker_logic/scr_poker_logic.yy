@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_poker_logic",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_poker_logic",
+  "parent":{
+    "name":"LyingGame",
+    "path":"LyingGame.yyp",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

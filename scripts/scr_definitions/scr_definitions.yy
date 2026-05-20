@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_definitions",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_definitions",
+  "parent":{
+    "name":"LyingGame",
+    "path":"LyingGame.yyp",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

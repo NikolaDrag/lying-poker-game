@@ -1,0 +1,1 @@
+draw_clear(c_black);// first step of the pipeline of rendering each frame
