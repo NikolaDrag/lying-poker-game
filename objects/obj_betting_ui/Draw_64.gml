@@ -1,4 +1,6 @@
-// Draw GUI Event
+// Draw GUI Event. Hidden while paused so those controls cannot cover the menu.
+if (instance_exists(obj_pause_menu)) exit;
+
 var _cb = obj_game_controller.current_bet;
 
 // 1. Determine if the current "Temp" selection is a valid raise

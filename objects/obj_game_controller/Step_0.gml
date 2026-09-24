@@ -1,9 +1,8 @@
-// Speaker sits above the pause menu so mute still works while paused.
 music_keep_alive();
-if (music_click_buttons()) exit;
 
-// Escape opens the pause menu. While it is open, the turn loop waits.
+// Escape opens the pause menu. While it is open, only that menu receives clicks.
 if (instance_exists(obj_pause_menu)) exit;
+if (music_click_buttons()) exit;
 if (keyboard_check_pressed(vk_escape)) {
     saved_alarm = alarm[0];
     alarm[0] = -1;
@@ -48,13 +47,20 @@ switch (state) {
         break;
 
     case GAME_STATE.WAITING_FOR_INPUT:
-        // This case now only runs for HUMANS because bots skip to BOT_THINKING
-        if (keyboard_check_pressed(ord("B"))) {
+        // This case now only runs for HUMANS because bots skip to BOT_THINKING.
+        // The buttons do the same thing as B and L.
+        var _open_bet = keyboard_check_pressed(ord("B"));
+        var _call_liar = keyboard_check_pressed(ord("L"));
+        if (mouse_check_button_pressed(mb_left)) {
+            var _mx = device_mouse_x_to_gui(0);
+            var _my = device_mouse_y_to_gui(0);
+            if (point_in_rectangle(_mx, _my, 1500, 2680, 2450, 3110)) _open_bet = true;
+            if (point_in_rectangle(_mx, _my, 2550, 2680, 3700, 3110)) _call_liar = true;
+        }
+        if (_open_bet) {
             state = GAME_STATE.INPUTTING_BET;
             instance_create_layer(0, 0, "UI_Layer", obj_betting_ui);
-        }
-        
-        if (keyboard_check_pressed(ord("L"))) {
+        } else if (_call_liar) {
             call_liar(current_turn); // Or resolve_challenge();
         }
         break;

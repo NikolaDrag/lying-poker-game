@@ -71,3 +71,9 @@ message.txt
 poekr_rules.txt
 images.jpg
 yugioh.jpg
+
+# Local music. The game still plays these files on this machine.
+# A clone from GitHub will not include them.
+datafiles/lofi_timer.mp3
+datafiles/lofi_timer.ogg
+10 Minute Timer*.mp3

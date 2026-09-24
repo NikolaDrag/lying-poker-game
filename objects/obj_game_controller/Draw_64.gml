@@ -44,4 +44,22 @@ else if (state == GAME_STATE.SWITCHING_TURN) {
     draw_text_transformed(_mid_x, _mid_y + 240, "PASS KEYBOARD & PRESS SPACE", 4, 4, 0);
 }
 draw_set_halign(fa_left); // Reset alignment!
+
+// Low in the purple area so a full hand of cards does not cover them.
+if (state == GAME_STATE.WAITING_FOR_INPUT && !game_over && !instance_exists(obj_pause_menu)) {
+    draw_set_halign(fa_center);
+    draw_set_valign(fa_middle);
+    draw_set_color(make_color_rgb(150, 210, 255));
+    draw_rectangle(1500, 2680, 2450, 3110, false);
+    draw_set_color(c_black);
+    draw_text_transformed(1975, 2895, "BET", 5, 5, 0);
+
+    draw_set_color(make_color_rgb(255, 170, 170));
+    draw_rectangle(2550, 2680, 3700, 3110, false);
+    draw_set_color(c_black);
+    draw_text_transformed(3125, 2895, "CALL LIAR", 5, 5, 0);
+    draw_set_valign(fa_top);
+    draw_set_halign(fa_left);
+}
+
 music_draw_buttons();

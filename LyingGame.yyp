@@ -12,8 +12,6 @@
   "Folders":[],
   "ForcedPrefabProjectReferences":[],
   "IncludedFiles":[
-    {"$GMIncludedFile":"","%Name":"lofi_timer.mp3","CopyToMask":-1,"filePath":"datafiles","name":"lofi_timer.mp3","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
-    {"$GMIncludedFile":"","%Name":"lofi_timer.ogg","CopyToMask":-1,"filePath":"datafiles","name":"lofi_timer.ogg","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"speaker_icon.png","CopyToMask":-1,"filePath":"datafiles","name":"speaker_icon.png","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
   ],
   "isEcma":false,
