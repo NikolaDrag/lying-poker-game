@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_bot_ai",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_bot_ai",
+  "parent":{
+    "name":"LyingGame",
+    "path":"LyingGame.yyp",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

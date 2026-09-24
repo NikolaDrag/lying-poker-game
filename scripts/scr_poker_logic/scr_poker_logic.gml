@@ -93,6 +93,15 @@ function next_turn() {
     
     _ctrl.current_turn++;
     if (_ctrl.current_turn >= _ctrl.num_players) _ctrl.current_turn = 0;
+
+    // Eliminated seats stay in the circle so the table still lines up, but they do not act.
+    var _guard = 0;
+    while (!_ctrl.alive[_ctrl.current_turn] && _guard < _ctrl.num_players) {
+        _ctrl.current_turn++;
+        if (_ctrl.current_turn >= _ctrl.num_players) _ctrl.current_turn = 0;
+        _guard++;
+    }
+
     _ctrl.state = GAME_STATE.SWITCHING_TURN;
 	with (obj_card) {
         instance_destroy();
@@ -107,6 +116,7 @@ function call_liar(_caller_idx) {
 
     if (_bet.better_index == -1) {
         show_debug_message("Wait! No bets have been placed yet.");
+        _ctrl.event_log = "Someone has to open with a bet before a bluff can be called.";
         return;
     }
 
@@ -122,25 +132,8 @@ function call_liar(_caller_idx) {
     } else {
         _msg += "P" + string(_bet.better_index + 1) + " was BLUFFING and draws.";
     }
-    _ctrl.event_log = _msg; 
+    _ctrl.event_log = _msg;
 
-    // 3. The Penalty
-    if (array_length(_ctrl.deck) > 0) {
-        var _new_card = array_pop(_ctrl.deck);
-        array_push(_ctrl.hands[_loser_idx], _new_card);
-    }
-
-    // 4. Game Over or Round Reset
-    if (array_length(_ctrl.hands[_loser_idx]) >= _ctrl.lose_condition) {
-        _ctrl.game_over = true;
-        _ctrl.refresh_hand_visuals(_loser_idx);
-    } else {
-        // --- CRITICAL SCOPE FIXES ---
-        _ctrl.current_turn = _loser_idx; // Loser starts
-        _ctrl.reset_round();             // Added _ctrl prefix
-        _ctrl.state = GAME_STATE.SWITCHING_TURN; // Added _ctrl prefix
-    }
-
-    // 5. Reset Round State
-    _ctrl.current_bet = new Bet(POKER_HAND.HIGH_CARD, 0, 0, -1);
+    // Penalty, reveal, and who opens next live in scr_round_flow.
+    apply_round_loss(_loser_idx, _is_bet_valid);
 }

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_round_flow",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_round_flow",
+  "parent":{
+    "name":"LyingGame",
+    "path":"LyingGame.yyp",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

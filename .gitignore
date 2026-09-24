@@ -62,3 +62,12 @@ Temporary Items
 # GMRT build directory
 Build
 build/
+
+# Local notes, Cursor rules, and the bot harness. The game does not load these.
+.cursor/
+tests/
+intial_prompt.txt
+message.txt
+poekr_rules.txt
+images.jpg
+yugioh.jpg

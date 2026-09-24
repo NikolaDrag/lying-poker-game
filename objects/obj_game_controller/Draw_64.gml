@@ -11,11 +11,11 @@ draw_set_halign(fa_left); // Essential safety reset
 draw_set_valign(fa_top);
 
 draw_set_color(c_yellow);
-draw_text_transformed(20, 20, "LOG: " + event_log, 3, 3, 0);
+draw_text_transformed(20, 24, "LOG: " + event_log, 4, 4, 0);
 
 draw_set_color(c_white);
-// Move Active Player down to 120 so it doesn't touch the Log
-draw_text_transformed(20, 120, "ACTIVE PLAYER: P" + string(current_turn + 1), 3, 3, 0);
+// Move Active Player down so it doesn't touch the Log
+draw_text_transformed(20, 160, "ACTIVE PLAYER: P" + string(current_turn + 1), 4, 4, 0);
 
 // 3. Bet Info
 if (current_bet.better_index != -1) { 
@@ -26,7 +26,7 @@ if (current_bet.better_index != -1) {
     // Also use transformed so we can actually see it!
     var _cat_name = hand_names[_b.category];
 	var _bet_string = "CURRENT BET: P" + string(_b.better_index + 1) + " - " + _cat_name + " (Val: " + string(_b.value1) + ")";
-    draw_text_transformed(20, 220, _bet_string, 3, 3, 0);
+    draw_text_transformed(20, 300, _bet_string, 4, 4, 0);
 }
 // 4. Center-Screen Notifications
 draw_set_halign(fa_center);
@@ -36,11 +36,11 @@ var _mid_y = display_get_gui_height() / 2;
 if (game_over) {
     draw_set_color(c_red);
     draw_text_transformed(_mid_x, _mid_y, "GAME OVER", 6, 6, 0);
-    draw_text_transformed(_mid_x, _mid_y + 200, "Press 'R' to Restart", 3, 3, 0);
+    draw_text_transformed(_mid_x, _mid_y + 240, "Press 'R' to Restart", 4, 4, 0);
 } 
 else if (state == GAME_STATE.SWITCHING_TURN) {
     draw_set_color(c_aqua);
-    draw_text_transformed(_mid_x, _mid_y, "NEXT TURN: PLAYER " + string(current_turn + 1), 5, 5, 0);
-    draw_text_transformed(_mid_x, _mid_y + 200, "PASS KEYBOARD & PRESS SPACE", 3, 3, 0);
+    draw_text_transformed(_mid_x, _mid_y, "NEXT TURN: PLAYER " + string(current_turn + 1), 6, 6, 0);
+    draw_text_transformed(_mid_x, _mid_y + 240, "PASS KEYBOARD & PRESS SPACE", 4, 4, 0);
 }
 draw_set_halign(fa_left); // Reset alignment!

@@ -1,3 +1,12 @@
+// Escape opens the pause menu. While it is open, the turn loop waits.
+if (instance_exists(obj_pause_menu)) exit;
+if (keyboard_check_pressed(vk_escape)) {
+    saved_alarm = alarm[0];
+    alarm[0] = -1;
+    instance_create_layer(0, 0, "UI_Layer", obj_pause_menu);
+    exit;
+}
+
 if (game_over) {
     if (keyboard_check_pressed(ord("R"))) room_restart();
     exit; 
@@ -5,11 +14,24 @@ if (game_over) {
 
 switch (state) {
     case GAME_STATE.SWITCHING_TURN:
+        // Reveal stays up until the player at the keyboard presses Space.
+        // That same press then falls through into the normal pass / bot delay.
+        if (reveal_pending) {
+            if (keyboard_check_pressed(vk_space)) {
+                reveal_pending = false;
+                reveal_lines = [];
+                reveal_header = "";
+                reset_round();
+            } else {
+                break;
+            }
+        }
+
         // If it's a bot's turn, don't make the human press Space
         if (is_bot[current_turn]) {
             with (obj_card) instance_destroy(); // Clear screen
             state = GAME_STATE.BOT_THINKING;
-            alarm[0] = room_speed * 1.5; // Set the "thinking" delay
+            alarm[0] = room_speed * random_range(3, 8); // Each bot waits a different 3 to 8 seconds
         } 
         else {
             // Human turn: Wait for Spacebar

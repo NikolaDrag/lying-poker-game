@@ -113,99 +113,24 @@ is_bet_valid_increase = function(_new_cat, _new_v1, _new_v2) {
     return false; // Lower or identical bet
 }
 
+// Alarm 0 still calls this. The decision itself lives in scr_bot_ai.
 execute_bot_turn = function() {
-    var _cb = current_bet;
-    var _my_hand = hands[current_turn];
-    var _hand_len = array_length(_my_hand);
-    
-    // Count total cards in game
-    var _total_cards = 0;
-    for(var i=0; i<num_players; i++) _total_cards += array_length(hands[i]);
-
-    // --- 1. ANALYZE MY OWN HAND ---
-    // Find my most frequent card value to use as a "Strong Point"
-    var _val_counts = array_create(14, 0);
-    var _best_val = irandom_range(2, 13); // Default to random if hand is empty
-    var _max_seen = 0;
-    
-    for (var i = 0; i < _hand_len; i++) {
-        var _v = _my_hand[i].value;
-        _val_counts[_v]++;
-        if (_val_counts[_v] > _max_seen) {
-            _max_seen = _val_counts[_v];
-            _best_val = _v;
-        }
-    }
-
-    // --- 2. EVALUATE PREVIOUS BET ---
-    var _i_have = _val_counts[_cb.value1];
-    
-    // Probability estimation: 
-    // "I have X, and there are Y cards I can't see. Roughly 1 out of 13 cards should match."
-    var _others_likely_have = (_total_cards - _hand_len) / 10; // Aggressive estimate
-    var _estimated_total = _i_have + _others_likely_have;
-    
-    // Confidence is how much the current bet exceeds our estimation
-    // Higher threshold = Bot is more "Trusting"
-    var _needed_for_bet = 1; // Default for High Card
-    if (_cb.category == POKER_HAND.PAIR) _needed_for_bet = 2;
-    if (_cb.category == POKER_HAND.THREE_KIND) _needed_for_bet = 3;
-    
-    var _confidence = (_estimated_total / _needed_for_bet) * random_range(0.8, 1.4);
-
-    // --- 3. DECIDE: CHALLENGE OR RAISE ---
-    // If confidence is very low, and it's not a fresh round, call Liar
-    if (_cb.better_index != -1 && _confidence < 0.6) {
-        event_log = "P" + string(current_turn + 1) + " thinks P" + string(_cb.better_index + 1) + " is bluffing!";
-        call_liar(current_turn);
-    } 
-    else {
-        // --- 4. RAISE LOGIC (The "Gnome Jump") ---
-        var _new_cat = _cb.category;
-        var _new_v1 = _cb.value1;
-        
-        // If starting fresh, start with something I actually have!
-        if (_cb.better_index == -1) {
-            _new_v1 = _best_val;
-            _new_cat = (_max_seen >= 2) ? POKER_HAND.PAIR : POKER_HAND.HIGH_CARD;
-        } 
-        else {
-            // Decide how much to jump (1 to 3 values)
-            var _jump = irandom_range(1, 3);
-            
-            // If I have the card, I'm more likely to jump higher
-            if (_val_counts[_cb.value1] > 0) _jump = irandom_range(2, 4);
-
-            // Apply jump with power-remap (Ace is 14)
-            repeat(_jump) {
-                if (_new_v1 == 1) { // Current is Ace
-                    _new_v1 = 2;
-                    _new_cat++;
-                } else if (_new_v1 == 13) { // Current is King
-                    _new_v1 = 1; // Move to Ace
-                } else {
-                    _new_v1++;
-                }
-            }
-        }
-
-        // Final Safety
-        if (_new_cat > 9) _new_cat = 9;
-        
-        current_bet = new Bet(_new_cat, _new_v1, 0, current_turn);
-        
-        // Make the log sound natural
-        var _val_name = (_new_v1 == 1) ? "Aces" : string(_new_v1) + "s";
-        event_log = "P" + string(current_turn + 1) + " raises: " + hand_names[_new_cat] + " of " + _val_name;
-        
-        next_turn();
-    }
+	bot_take_turn();
 }
 
 randomize(); //random seed
 
-num_players = 4; 
-lose_condition = 5; // Reach 7 cards to lose
+// Match setup writes these globals. Starting Room1 directly still has a full table.
+num_players = variable_global_exists("match_players") ? global.match_players : 4;
+lose_condition = variable_global_exists("match_out_at") ? global.match_out_at : 7;
+num_bots = variable_global_exists("match_bots") ? global.match_bots : -1;
+if (num_players < 2) num_players = 2;
+if (num_players > 7) num_players = 7;
+if (lose_condition < 2) lose_condition = 2;
+if (lose_condition > max_out_at(num_players)) lose_condition = max_out_at(num_players);
+if (num_bots < 0) num_bots = num_players - 1;
+if (num_bots > num_players - 1) num_bots = num_players - 1;
+
 current_turn = 0;
 state = GAME_STATE.WAITING_FOR_INPUT;
 // In Create Event
@@ -217,11 +142,22 @@ msg_val2 = -1;
 temp_cat = 0;
 temp_val1 = 0;
 temp_val2 = 0;
-// 0 = Human, 1+ = Bots
+// Seat 1 is always you. Bots fill the last seats. Empty seats before them pass the keyboard.
 is_bot = [];
+alive = [];
+bot_personality = [];
+var _first_bot = num_players - num_bots;
 for (var i = 0; i < num_players; i++) {
-    array_push(is_bot, i != 0);
+    array_push(is_bot, i >= _first_bot);
+	array_push(alive, true);
+	array_push(bot_personality, bot_make_personality());
 }
+reveal_pending = false;
+reveal_lines = [];
+reveal_header = "";
+winner_index = -1;
+bet_log = [];
+saved_alarm = -1;
 // Create the Deck, naredeni dvoiki
 deck = [];
 current_bet = new Bet(POKER_HAND.HIGH_CARD, 0, 0, -1);//category, value 1, value 2 , playerindex
@@ -248,18 +184,8 @@ for (var p = 0; p < num_players; p++) {// Deal 1 card - starting deal
 current_turn = 0; // Player 0 starts
 game_over = false;
 
-var _p1_card = hands[0][0];
-var _p1_card2 = hands[0][1];
-var _p1_card3 = hands[0][2];
-var _p2_card = hands[1][0];
-//var _p3_card = hands[2][0];
-//var _p4_card = hands[3][0];
-
-show_debug_message("Game Initialized for " + string(num_players) + " players.");
-show_debug_message("Player 1 starts with: " + _p1_card.get_name());
-show_debug_message("Player 1.2 starts with: " + _p1_card2.get_name());
-show_debug_message("Player 1.3 starts with: " + _p1_card3.get_name());
-//show_debug_message("Player 4 starts with: " + _p4_card.get_name());
+show_debug_message("Game Initialized for " + string(num_players) + " players. Out at " + string(lose_condition) + " cards.");
+show_debug_message("Player 1 starts with: " + hands[0][0].get_name());
 
 
 // 1. Coordinates for the player's hand
@@ -285,6 +211,9 @@ show_debug_message("Instance Count: " + string(instance_number(obj_card)));
 
 if (!instance_exists(obj_opponents)) {
     instance_create_layer(0, 0, "Opponent_Layer", obj_opponents);// call object opponents constructor
+}
+if (!instance_exists(obj_hud)) {
+	instance_create_layer(0, 0, "Instances", obj_hud);
 }
 display_set_gui_size(5000, 3500);
 event_log = "Game Started. Player 1's turn.";

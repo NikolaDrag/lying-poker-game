@@ -2,12 +2,15 @@
 // and has the SAME giant rectangle hitbox.
 // We use the mouse's Y position to filter the click.
 
+// The setup panel is on top. Don't let New Game, Options, or Quit click through it.
+if (instance_exists(obj_match_setup)) exit;
+
 var _my = mouse_y;
 
 switch (image_index) {
     case 0: // NEW GAME
         if (_my >= 2335 && _my <= 2535) { // These match your current screenshot!
-            room_goto(Room1);
+            instance_create_layer(0, 0, "Instances", obj_match_setup);
         }
         break;
         
