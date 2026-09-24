@@ -83,6 +83,150 @@ function count_humans() {
 	return _n;
 }
 
+/// Included files are not always copied into working_directory when you press F5.
+/// Search the runtime folder and the project folder.
+function music_find(_file_name) {
+	var _paths = [
+		working_directory + _file_name,
+		working_directory + "datafiles\\" + _file_name,
+		program_directory + _file_name,
+		program_directory + "datafiles\\" + _file_name,
+		"D:\\LyingGame\\datafiles\\" + _file_name,
+		"D:\\LyingGame\\" + _file_name
+	];
+	for (var i = 0; i < array_length(_paths); i++) {
+		if (file_exists(_paths[i])) return _paths[i];
+	}
+	return "";
+}
+
+/// Starts the menu song once. The file is about 10 minutes. It is restarted when it ends.
+function music_boot() {
+	if (variable_global_exists("music_ready") && global.music_ready) return;
+	global.music_ready = true;
+	global.music_on = true;
+	global.music_song = -1;
+	global.music_voice = -1;
+	global.music_icon = -1;
+	global.music_status = "NO FILE";
+	display_set_gui_size(5000, 3500);
+
+	// GameMaker can only stream OGG. An mp3 stream is silent.
+	// The name is relative so the included file inside the game sandbox is used.
+	var _song_path = "";
+	if (file_exists("lofi_timer.ogg")) _song_path = "lofi_timer.ogg";
+	else _song_path = music_find("lofi_timer.ogg");
+	var _icon_path = music_find("speaker_icon.png");
+
+	if (_song_path != "") {
+		global.music_song = audio_create_stream(_song_path);
+		global.music_voice = audio_play_sound(global.music_song, 100, true);
+		if (global.music_voice == -1) {
+			global.music_status = "PLAY FAILED";
+			show_debug_message("Stream was created but did not play: " + _song_path);
+		} else {
+			audio_sound_gain(global.music_voice, 1, 0);
+			global.music_status = "ON";
+			show_debug_message("Music playing from: " + _song_path);
+		}
+	} else {
+		global.music_status = "NO FILE";
+		show_debug_message("lofi_timer.ogg was not in the game sandbox. Reopen the project so GameMaker copies included files.");
+	}
+	if (_icon_path != "") {
+		global.music_icon = sprite_add(_icon_path, 1, false, false, 0, 0);
+	}
+}
+
+/// Call every frame. Restarts the track after the 10 minute file ends.
+function music_keep_alive() {
+	if (!variable_global_exists("music_ready") || !global.music_on) return;
+	if (global.music_song == -1 || global.music_voice == -1) return;
+	if (audio_is_paused(global.music_voice)) return;
+	if (!audio_is_playing(global.music_voice)) {
+		global.music_voice = audio_play_sound(global.music_song, 100, false);
+		audio_sound_gain(global.music_voice, 1, 0);
+	}
+}
+
+function music_toggle() {
+	if (!variable_global_exists("music_ready")) music_boot();
+	global.music_on = !global.music_on;
+	if (global.music_voice == -1 || global.music_song == -1) return;
+
+	if (global.music_on) {
+		global.music_status = "ON";
+		if (audio_is_paused(global.music_voice)) {
+			audio_resume_sound(global.music_voice);
+		} else if (!audio_is_playing(global.music_voice)) {
+			global.music_voice = audio_play_sound(global.music_song, 100, false);
+			audio_sound_gain(global.music_voice, 1, 0);
+		}
+	} else {
+		global.music_status = "OFF";
+		audio_pause_sound(global.music_voice);
+	}
+}
+
+function music_draw_speaker(_x1, _y1, _x2, _y2, _label) {
+	draw_set_alpha(0.85);
+	draw_set_color(make_color_rgb(18, 28, 24));
+	draw_rectangle(_x1, _y1, _x2, _y2, false);
+	draw_set_alpha(1);
+	draw_set_color(c_white);
+	draw_rectangle(_x1, _y1, _x2, _y2, true);
+
+	var _box = min((_x2 - _x1) - 36, (_y2 - _y1) - 36);
+	if (_label != "") _box = min(_box, (_y2 - _y1) - 100);
+	if (global.music_icon != -1) {
+		var _scale = _box / max(1, sprite_get_width(global.music_icon));
+		draw_sprite_ext(global.music_icon, 0, _x1 + 18, _y1 + 16, _scale, _scale, 0, c_white, 1);
+	}
+
+	if (!global.music_on) {
+		draw_set_color(c_red);
+		draw_line_width(_x1 + 14, _y1 + 14, _x2 - 14, _y2 - 14, 8);
+		draw_line_width(_x2 - 14, _y1 + 14, _x1 + 14, _y2 - 14, 8);
+	}
+
+	if (_label != "") {
+		draw_set_halign(fa_left);
+		draw_set_valign(fa_bottom);
+		draw_set_color(global.music_on ? c_aqua : c_gray);
+		draw_text_transformed(_x1 + 24, _y2 - 12, _label, 2.6, 2.6, 0);
+	}
+}
+
+function music_draw_buttons() {
+	if (!variable_global_exists("music_ready")) return;
+	var _gui_w = display_get_gui_width();
+	var _gui_h = display_get_gui_height();
+	music_draw_speaker(_gui_w - 200, _gui_h - 200, _gui_w - 40, _gui_h - 40, "");
+	if (room == rm_main_menu) {
+		var _word = "MUSIC " + global.music_status;
+		music_draw_speaker(160, 160, 920, 430, _word);
+	}
+	draw_set_halign(fa_left);
+	draw_set_valign(fa_top);
+	draw_set_color(c_white);
+	draw_set_alpha(1);
+}
+
+/// Returns true when the click was on a music button.
+function music_click_buttons() {
+	if (!mouse_check_button_pressed(mb_left)) return false;
+	if (!variable_global_exists("music_ready")) music_boot();
+	var _mx = device_mouse_x_to_gui(0);
+	var _my = device_mouse_y_to_gui(0);
+	var _gui_w = display_get_gui_width();
+	var _gui_h = display_get_gui_height();
+	var _hit = point_in_rectangle(_mx, _my, _gui_w - 200, _gui_h - 200, _gui_w - 40, _gui_h - 40);
+	if (room == rm_main_menu && point_in_rectangle(_mx, _my, 160, 160, 920, 430)) _hit = true;
+	if (!_hit) return false;
+	music_toggle();
+	return true;
+}
+
 function control_hint(_ctrl) {
 	if (_ctrl.game_over) return "R: play again";
 	if (_ctrl.reveal_pending) return "SPACE: deal the next round";

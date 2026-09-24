@@ -44,3 +44,4 @@ else if (state == GAME_STATE.SWITCHING_TURN) {
     draw_text_transformed(_mid_x, _mid_y + 240, "PASS KEYBOARD & PRESS SPACE", 4, 4, 0);
 }
 draw_set_halign(fa_left); // Reset alignment!
+music_draw_buttons();

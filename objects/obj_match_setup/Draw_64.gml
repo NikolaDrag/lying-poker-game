@@ -1,3 +1,46 @@
+if (panel_mode == "options") {
+	draw_set_alpha(0.72);
+	draw_set_color(c_black);
+	draw_rectangle(0, 0, display_get_gui_width(), display_get_gui_height(), false);
+	draw_set_alpha(1);
+
+	draw_set_color(make_color_rgb(18, 28, 24));
+	draw_rectangle(1300, 620, 3700, 3050, false);
+	draw_set_color(c_white);
+	draw_rectangle(1300, 620, 3700, 3050, true);
+
+	draw_set_halign(fa_center);
+	draw_set_valign(fa_middle);
+	draw_set_color(c_yellow);
+	draw_text_transformed(2500, 820, "OPTIONS", 5, 5, 0);
+
+	draw_set_color(c_white);
+	draw_text_transformed(2500, 1080, "MUSIC", 3.2, 3.2, 0);
+
+	if (variable_global_exists("music_on") && global.music_on) draw_set_color(c_green);
+	else draw_set_color(c_maroon);
+	draw_rectangle(hit_music[0], hit_music[1], hit_music[2], hit_music[3], false);
+	draw_set_color(c_white);
+	draw_rectangle(hit_music[0], hit_music[1], hit_music[2], hit_music[3], true);
+	var _music_word = "MUSIC OFF";
+	if (variable_global_exists("music_status")) _music_word = "MUSIC " + global.music_status;
+	else if (variable_global_exists("music_on") && global.music_on) _music_word = "MUSIC ON";
+	draw_text_transformed(2500, (hit_music[1] + hit_music[3]) * 0.5, _music_word, 4, 4, 0);
+
+	draw_set_color(c_ltgray);
+	draw_text_transformed(2500, 1900, "Click the button to turn the song on or off.", 2.2, 2.2, 0);
+
+	draw_set_color(c_maroon);
+	draw_rectangle(hit_back[0], hit_back[1], hit_back[2], hit_back[3], false);
+	draw_set_color(c_white);
+	draw_text_transformed(2500, (hit_back[1] + hit_back[3]) * 0.5, "BACK", 3, 3, 0);
+
+	draw_set_halign(fa_left);
+	draw_set_valign(fa_top);
+	draw_set_color(c_white);
+	exit;
+}
+
 draw_set_alpha(0.72);
 draw_set_color(c_black);
 draw_rectangle(0, 0, display_get_gui_width(), display_get_gui_height(), false);

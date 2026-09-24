@@ -1,3 +1,7 @@
+// Speaker sits above the pause menu so mute still works while paused.
+music_keep_alive();
+if (music_click_buttons()) exit;
+
 // Escape opens the pause menu. While it is open, the turn loop waits.
 if (instance_exists(obj_pause_menu)) exit;
 if (keyboard_check_pressed(vk_escape)) {

@@ -215,5 +215,6 @@ if (!instance_exists(obj_opponents)) {
 if (!instance_exists(obj_hud)) {
 	instance_create_layer(0, 0, "Instances", obj_hud);
 }
+music_boot();
 display_set_gui_size(5000, 3500);
 event_log = "Game Started. Player 1's turn.";

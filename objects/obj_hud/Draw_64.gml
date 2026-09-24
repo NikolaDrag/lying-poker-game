@@ -10,7 +10,8 @@ draw_set_halign(fa_left);
 
 var _gui_w = display_get_gui_width();
 var _gui_h = display_get_gui_height();
-var _x = _gui_w - 2100;
+// Just left of the right-aligned LAST BETS column.
+var _x = _gui_w - 1680;
 var _y = 24;
 
 draw_set_color(c_aqua);
@@ -32,20 +33,22 @@ for (var i = 0; i < _ctrl.num_players; i++) {
 	draw_text_transformed(_x, _y + 120 + (i * 105), _line, 3.6, 3.6, 0);
 }
 
-var _bets_y = _y + 150 + (_ctrl.num_players * 105);
+// Newest claim on top, pinned to the right edge beside the table.
+draw_set_halign(fa_right);
+var _bets_x = _gui_w - 36;
 draw_set_color(c_orange);
-draw_text_transformed(_x, _bets_y, "LAST BETS", 4, 4, 0);
+draw_text_transformed(_bets_x, _y, "LAST BETS", 4, 4, 0);
 if (array_length(_ctrl.bet_log) == 0) {
 	draw_set_color(c_white);
-	draw_text_transformed(_x, _bets_y + 100, "No bets yet.", 3.3, 3.3, 0);
+	draw_text_transformed(_bets_x, _y + 110, "No bets yet.", 3.3, 3.3, 0);
 } else {
 	var _logged = array_length(_ctrl.bet_log);
 	for (var b = 0; b < _logged; b++) {
 		draw_set_color(c_white);
-		// Index 0 is the oldest. Draw from the end so the newest claim is on top.
-		draw_text_transformed(_x, _bets_y + 100 + (b * 95), _ctrl.bet_log[_logged - 1 - b], 3.3, 3.3, 0);
+		draw_text_transformed(_bets_x, _y + 110 + (b * 95), _ctrl.bet_log[_logged - 1 - b], 3.3, 3.3, 0);
 	}
 }
+draw_set_halign(fa_left);
 
 var _mid_x = _gui_w * 0.5;
 var _mid_y = _gui_h * 0.5;

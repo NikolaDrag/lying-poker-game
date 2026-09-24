@@ -1,4 +1,11 @@
-/// New Game settings. Options and Quit stay on the menu behind this panel.
+/// New Game settings, or the Options panel. One object so GameMaker
+/// does not need a second menu asset.
+panel_mode = "newgame";
+if (variable_global_exists("panel_mode") && global.panel_mode == "options") {
+	panel_mode = "options";
+	global.panel_mode = "newgame";
+}
+
 players = variable_global_exists("match_players") ? global.match_players : 4;
 out_at = variable_global_exists("match_out_at") ? global.match_out_at : 7;
 bots = variable_global_exists("match_bots") ? global.match_bots : 3;
@@ -18,3 +25,4 @@ hit_out_up = [3080, 1080, 3520, 1360];
 hit_out_down = [3080, 1580, 3520, 1860];
 hit_start = [1550, 2360, 3450, 2600];
 hit_back = [1900, 2700, 3100, 2920];
+hit_music = [1550, 1280, 3450, 1600];

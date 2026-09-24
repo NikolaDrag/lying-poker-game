@@ -2,6 +2,9 @@
 // and has the SAME giant rectangle hitbox.
 // We use the mouse's Y position to filter the click.
 
+// One instance handles the speaker. The other copies of this object would toggle it again.
+if (image_index == 0 && music_click_buttons()) exit;
+
 // The setup panel is on top. Don't let New Game, Options, or Quit click through it.
 if (instance_exists(obj_match_setup)) exit;
 
@@ -14,9 +17,12 @@ switch (image_index) {
         }
         break;
         
-    case 1: // OPTIONS
-        if (_my >= 2650 && _my <= 2875) { // Guessing heights - check your sprite!
-            show_message_async("Options: \n1. Music: ON\n2. Difficulty: Hard");
+    case 1: // OPTIONS opens the same style of panel as New Game.
+        if (_my >= 2580 && _my <= 2960) {
+            if (!instance_exists(obj_match_setup)) {
+                global.panel_mode = "options";
+                instance_create_layer(0, 0, "Instances", obj_match_setup);
+            }
         }
         break;
         

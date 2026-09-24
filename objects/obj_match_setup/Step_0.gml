@@ -3,6 +3,15 @@ if (!mouse_check_button_pressed(mb_left)) exit;
 var _mx = device_mouse_x_to_gui(0);
 var _my = device_mouse_y_to_gui(0);
 
+if (panel_mode == "options") {
+	if (point_in_rectangle(_mx, _my, hit_music[0], hit_music[1], hit_music[2], hit_music[3])) {
+		music_toggle();
+	} else if (point_in_rectangle(_mx, _my, hit_back[0], hit_back[1], hit_back[2], hit_back[3])) {
+		instance_destroy();
+	}
+	exit;
+}
+
 if (point_in_rectangle(_mx, _my, hit_players_up[0], hit_players_up[1], hit_players_up[2], hit_players_up[3])) {
 	if (players < 7) {
 		var _filled = (bots == players - 1);
